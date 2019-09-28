@@ -21,18 +21,22 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     queuingsystem.cpp \
+    request.cpp \
     selectionmanager.cpp \
     setmanager.cpp \
-    source.cpp
+    source.cpp \
+    statisticcollector.cpp
 
 HEADERS += \
     buffer.h \
     device.h \
     mainwindow.h \
     queuingsystem.h \
+    request.h \
     selectionmanager.h \
     setmanager.h \
-    source.h
+    source.h \
+    statisticcollector.h
 
 FORMS += \
     mainwindow.ui

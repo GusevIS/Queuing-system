@@ -1,6 +1,6 @@
 #include "queuingsystem.h"
 
-QueuingSystem::QueuingSystem()
+QueuingSystem::QueuingSystem(int numberOfSources, int workIntensity, int numberOfDevices, int serviceIntensity, int bufferSize)
 {
     Source source;
     sources.push_back(source);

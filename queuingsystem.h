@@ -11,7 +11,7 @@
 class QueuingSystem
 {
 public:
-    QueuingSystem();
+    QueuingSystem(int numberOfSources, int workIntensity, int numberOfDevices, int serviceIntensity, int bufferSize);
 
 private:
     std::vector<Source> sources;

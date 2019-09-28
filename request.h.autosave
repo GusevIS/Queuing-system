@@ -1,0 +1,20 @@
+#ifndef REQUEST_H
+#define REQUEST_H
+
+struct RequestNumber
+{
+    int sourceNumber;
+    int serialRequestNumber;
+};
+
+class Request
+{
+public:
+    Request();
+    
+private:
+    RequestNumber requestNumber;
+    int generationTime;
+};
+
+#endif // REQUEST_H
