@@ -1,11 +1,10 @@
 #ifndef REQUEST_H
 #define REQUEST_H
 
-
-class Request
+struct Request
 {
-public:
-    Request();
+  int sourceNumber;
+  double generationTime;
 };
 
 #endif // REQUEST_H
