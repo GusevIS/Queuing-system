@@ -51,8 +51,16 @@ void QueuingSystem::startSystem()
       sources_[buffer_.getSrcNumberOfOldestRequest()].increaseDeniedRequestsCount();
       //systemIsActive = false;
     }
-    std::remove(requestsToBuffer.begin(), requestsToBuffer.end(), earliestRequest);
+    requestsToBuffer.erase(std::remove(requestsToBuffer.begin(), requestsToBuffer.end(), earliestRequest));
     buffer_.receiveRequest(earliestRequest);
-    Sleep(3000);
+/////////////////////////////////////////////////////////////////////////////////
+    Sleep(1000);
+    std::cout << "requests left" << std::endl;
+    for(auto request: requestsToBuffer){
+        std::cout << request.sourceNumber << " " << request.generationTime << std::endl;
+    }
+    std::cout << "-----------------" << std::endl;
+
+/////////////////////////////////////////////////////////////////////////////////
   }
 }
