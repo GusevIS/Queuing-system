@@ -23,6 +23,7 @@ private:
   std::vector<Source> sources_;
   std::vector<Device> devices_;
   Buffer buffer_;
+  double currentTime_;
 };
 
 #endif // QUEUINGSYSTEM_H

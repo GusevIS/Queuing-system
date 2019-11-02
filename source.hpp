@@ -10,7 +10,7 @@ class Source
 {
 public:
   Source(double lambda, int sourceNumber);
-  Request generateRequest();
+  Request generateRequest(double currentTime);
   void increaseDeniedRequestsCount();
   int getDeniedRequestsCount() const;
   void setDeniedRequestsCount(int deniedRequestsCount);
@@ -18,7 +18,6 @@ public:
 private:
   double lambda_;
   int requestsCount_;
-  double totalTime_;
   const int sourceNumber_;
   int deniedRequestsCount_;
 
