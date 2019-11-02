@@ -13,6 +13,11 @@ QueuingSystem::QueuingSystem(int numberOfSources, int workIntensity,
     sources_.push_back(source);
   }
 
+  for (int i = 0; i < numberOfDevices; i++){
+    Device device(i);
+    devices_.push_back(device);
+  }
+
   systemIsActive = true;
 }
 
@@ -27,10 +32,21 @@ bool operator< (const Request &request1, const Request &request2)
     return request1.generationTime < request2.generationTime;
 }
 
-Request QueuingSystem::chooseEarliestRequest(std::vector<Request> requestsToBuffer)
+bool operator< (const Device &device1, const Device &device2)
+{
+    return device1.getReleaseTime() < device2.getReleaseTime();
+}
+
+Request QueuingSystem::chooseEarliestRequest(std::vector<Request> requestsToBuffer) const
 {
   std::vector<Request>::iterator earliestRequest = std::min_element(requestsToBuffer.begin(), requestsToBuffer.end());
   return *earliestRequest;
+}
+
+Device QueuingSystem::chooseDevice(std::vector<Device> devices) const
+{
+  std::vector<Device>::iterator device = std::min_element(devices.begin(), devices.end());
+  return *device;
 }
 
 void QueuingSystem::startSystem()
@@ -39,7 +55,7 @@ void QueuingSystem::startSystem()
   for(auto &source: sources_)
   {
     Request newRequest = source.generateRequest(currentTime_);
-    requestsToBuffer.push_back(newRequest);  //generate first requests from sources
+    requestsToBuffer.push_back(newRequest);                               //generate first requests from sources
     std::cout << newRequest.sourceNumber << " " << newRequest.generationTime << "\n";
   }
 
@@ -48,6 +64,19 @@ void QueuingSystem::startSystem()
   while(systemIsActive)
   {
     Request earliestRequest = chooseEarliestRequest(requestsToBuffer);
+    Device device = chooseDevice(devices_);
+
+    if(device.getReleaseTime() <= earliestRequest.generationTime)
+    {
+      Request selectedRequest = buffer_.selectRequest();
+      currentTime_ = device.calculateServiceTime(currentTime_);
+
+
+    }else{
+
+    }
+
+
     if(buffer_.isFull()){
       sources_[buffer_.getSrcNumberOfOldestRequest()].increaseDeniedRequestsCount();
       //systemIsActive = false;

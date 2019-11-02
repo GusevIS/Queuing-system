@@ -12,10 +12,10 @@ Source::Source(double lambda, int sourceNumber):
 
 Request Source::generateRequest(double currentTime)
 {
-  double randomNumber = 0.0;
-  while (randomNumber == 1.0 || randomNumber == 0.0 )
-    randomNumber = rand() * fraction;
-  double generationTime = currentTime + (-log(randomNumber)/lambda_);
+  double randNumber = 0.0;
+  while (randNumber == 1.0 || randNumber == 0.0 )
+    randNumber = rand() * fraction;
+  double generationTime = currentTime + (-log(randNumber)/lambda_);
 
   Request request{sourceNumber_, generationTime};
   requestsCount_++;

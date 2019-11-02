@@ -13,6 +13,7 @@ public:
   void receiveRequest(Request request);
   bool isFull() const;
   int getSrcNumberOfOldestRequest();
+  Request selectRequest();
 
 
 private:

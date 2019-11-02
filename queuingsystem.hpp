@@ -16,7 +16,8 @@ public:
   QueuingSystem(int numberOfSources, int workIntensity,
                 int numberOfDevices, int serviceIntensity, unsigned int bufferSize);
   void startSystem();
-  Request chooseEarliestRequest(std::vector<Request> requestsToBuffer);
+  Request chooseEarliestRequest(std::vector<Request> requestsToBuffer) const;
+  Device chooseDevice(std::vector<Device> devices) const;
 
 private:
   bool systemIsActive;

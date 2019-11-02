@@ -36,3 +36,13 @@ bool Buffer::isFull() const
 {
   return (requests_.size() >= bufferSize_);
 }
+
+Request Buffer::selectRequest()
+{
+    std::vector<Request>::iterator selectedRequest = std::min_element(requests_.begin(), requests_.end(),
+                                                                      [](const Request &req1, const Request &req2){
+      return req1.sourceNumber < req2.sourceNumber;
+    });
+    requests_.erase(std::remove(requests_.begin(), requests_.end(), selectedRequest));
+  return *selectedRequest;
+}
