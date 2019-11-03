@@ -49,6 +49,14 @@ Device QueuingSystem::chooseDevice(std::vector<Device> devices) const
   return *device;
 }
 
+NextEvent QueuingSystem::determineNextEvent(Request earliestRequest, Device device) const
+{
+  if((device.getReleaseTime() <= earliestRequest.generationTime) && (!buffer_.isEmpty()))
+    return NextEvent::SETTING_TO_DEVICE;
+  else
+    return NextEvent::SETTING_TO_BUFFER;
+}
+
 void QueuingSystem::startSystem()
 {
   std::vector<Request> requestsToBuffer;
@@ -65,27 +73,37 @@ void QueuingSystem::startSystem()
   {
     Request earliestRequest = chooseEarliestRequest(requestsToBuffer);
     Device device = chooseDevice(devices_);
-
-    if(device.getReleaseTime() <= earliestRequest.generationTime)
+    NextEvent nextEvent = determineNextEvent(earliestRequest, device);
+    switch(nextEvent)
     {
+      case NextEvent::SETTING_TO_DEVICE:
+      {
+        Request selectedRequest = buffer_.selectRequest();
+        currentTime_ = device.calculateServiceTime(currentTime_);
+        break;
+      }
+      case NextEvent::SETTING_TO_BUFFER:
+      {
+        if(buffer_.isFull()){
+          sources_[buffer_.getSrcNumberOfOldestRequest()].increaseDeniedRequestsCount();
+        }
+        requestsToBuffer.erase(std::remove(requestsToBuffer.begin(), requestsToBuffer.end(), earliestRequest));
+        currentTime_ = earliestRequest.generationTime;
+        buffer_.receiveRequest(earliestRequest);
+        Request newRequest = sources_[earliestRequest.sourceNumber].generateRequest(currentTime_);
+        requestsToBuffer.push_back(newRequest);
+      break;
+      }
+    }
+  }
+
+
+
       Request selectedRequest = buffer_.selectRequest();
       currentTime_ = device.calculateServiceTime(currentTime_);
 
 
-    }else{
 
-    }
-
-
-    if(buffer_.isFull()){
-      sources_[buffer_.getSrcNumberOfOldestRequest()].increaseDeniedRequestsCount();
-      //systemIsActive = false;
-    }
-    requestsToBuffer.erase(std::remove(requestsToBuffer.begin(), requestsToBuffer.end(), earliestRequest));
-    currentTime_ = earliestRequest.generationTime;
-    buffer_.receiveRequest(earliestRequest);
-    Request newRequest = sources_[earliestRequest.sourceNumber].generateRequest(currentTime_);
-    requestsToBuffer.push_back(newRequest);
 /////////////////////////////////////////////////////////////////////////////////
     Sleep(1000);
     std::cout << "requests left " << currentTime_ << std::endl;

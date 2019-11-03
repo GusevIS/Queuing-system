@@ -27,3 +27,8 @@ double Device::getReleaseTime() const
 {
   return releaseTime_;
 }
+
+void Device::setReleaseTime(double time)
+{
+  releaseTime_ = time;
+}

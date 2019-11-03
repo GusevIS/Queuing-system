@@ -10,6 +10,12 @@
 #include "device.hpp"
 #include "source.hpp"
 
+enum NextEvent
+{
+  SETTING_TO_BUFFER,
+  SETTING_TO_DEVICE
+};
+
 class QueuingSystem
 {
 public:
@@ -18,6 +24,7 @@ public:
   void startSystem();
   Request chooseEarliestRequest(std::vector<Request> requestsToBuffer) const;
   Device chooseDevice(std::vector<Device> devices) const;
+  NextEvent determineNextEvent(Request earliestRequest, Device device) const;
 
 private:
   bool systemIsActive;

@@ -37,6 +37,11 @@ bool Buffer::isFull() const
   return (requests_.size() >= bufferSize_);
 }
 
+bool Buffer::isEmpty() const
+{
+  return (requests_.empty());
+}
+
 Request Buffer::selectRequest()
 {
     std::vector<Request>::iterator selectedRequest = std::min_element(requests_.begin(), requests_.end(),

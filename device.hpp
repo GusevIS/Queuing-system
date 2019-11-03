@@ -10,6 +10,7 @@ public:
   double calculateServiceTime(double currentTime);
   bool isFree(double currentTime) const;
   double getReleaseTime() const;
+  void setReleaseTime(double time);
 
 private:
   double releaseTime_;

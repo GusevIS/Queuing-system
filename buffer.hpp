@@ -12,6 +12,7 @@ public:
   Buffer(unsigned int bufferSize);
   void receiveRequest(Request request);
   bool isFull() const;
+  bool isEmpty() const;
   int getSrcNumberOfOldestRequest();
   Request selectRequest();
 
