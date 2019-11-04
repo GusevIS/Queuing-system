@@ -1,13 +1,11 @@
 #include "queuingsystem.hpp"
 
-QueuingSystem::QueuingSystem(int numberOfSources, int workIntensity,
-                             int numberOfDevices, int serviceIntensity, unsigned int bufferSize):
+QueuingSystem::QueuingSystem(int numberOfSources, int numberOfRequests,
+                             int numberOfDevices, double lambda, unsigned int bufferSize):
   buffer_(bufferSize),
-  currentTime_(0)
+  currentTime_(0),
+  numberOfRequests_(numberOfRequests)
 {
-
-  double lambda = 2; //temp
-
   for (int i = 0; i < numberOfSources; i++){
     Source source(lambda, i);
     sources_.push_back(source);
@@ -19,6 +17,7 @@ QueuingSystem::QueuingSystem(int numberOfSources, int workIntensity,
   }
 
   systemIsActive = true;
+  std::cout << "hhh \n";
 }
 
 bool operator== (const Request &request1, const Request &request2)

@@ -1,22 +1,15 @@
-#define _DEBUG
-
+#include "mainwindow.hpp"
+#include <QApplication>
 #include <ctime>
 #include "queuingsystem.hpp"
 
 int main(int argc, char *argv[])
 {
-    srand(static_cast<unsigned int>(time(0)));
-    QueuingSystem queuingSystem(4, 3, 3, 3, 8);
+  srand(static_cast<unsigned int>(time(0)));
 
-#ifdef _DEBUG
-    std::cout << "system online" << std::endl;
-#endif
+  QApplication a(argc, argv);
+  MainWindow w;
+  w.show();
 
-    queuingSystem.startSystem();
-
-#ifdef _DEBUG
-    std::cout << "system offline" << std::endl;
-#endif
-
-    return 0;
+  return a.exec();
 }

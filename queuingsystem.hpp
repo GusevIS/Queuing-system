@@ -20,8 +20,8 @@ enum NextEvent
 class QueuingSystem
 {
 public:
-  QueuingSystem(int numberOfSources, int workIntensity,
-                int numberOfDevices, int serviceIntensity, unsigned int bufferSize);
+  QueuingSystem(int numberOfSources, int numberOfRequests,
+                int numberOfDevices, double lambda, unsigned int bufferSize);
   void startSystem();
   Request chooseEarliestRequest(std::vector<Request> requestsToBuffer) const;
   Device chooseDevice(std::vector<Device> devices) const;
@@ -33,6 +33,7 @@ private:
   std::vector<Device> devices_;
   Buffer buffer_;
   double currentTime_;
+  const int numberOfRequests_;
 };
 
 #endif // QUEUINGSYSTEM_H
