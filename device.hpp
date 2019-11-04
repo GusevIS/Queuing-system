@@ -2,6 +2,7 @@
 #define DEVICE_H
 
 #include <cmath>
+#include <iostream>
 
 class Device
 {
@@ -11,6 +12,7 @@ public:
   bool isFree(double currentTime) const;
   double getReleaseTime() const;
   void setReleaseTime(double time);
+  int getDeviceNumber() const;
 
 private:
   double releaseTime_;

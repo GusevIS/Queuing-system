@@ -51,8 +51,13 @@ Device QueuingSystem::chooseDevice(std::vector<Device> devices) const
 
 NextEvent QueuingSystem::determineNextEvent(Request earliestRequest, Device device) const
 {
-  if((device.getReleaseTime() <= earliestRequest.generationTime) && (!buffer_.isEmpty()))
-    return NextEvent::SETTING_TO_DEVICE;
+  if(device.getReleaseTime() <= earliestRequest.generationTime)
+  {
+    if(!buffer_.isEmpty())
+      return NextEvent::SETTING_TO_DEVICE;
+    else
+      return NextEvent::FROM_SOURCE_TO_DEVICE;
+  }
   else
     return NextEvent::SETTING_TO_BUFFER;
 }
@@ -74,14 +79,10 @@ void QueuingSystem::startSystem()
     Request earliestRequest = chooseEarliestRequest(requestsToBuffer);
     Device device = chooseDevice(devices_);
     NextEvent nextEvent = determineNextEvent(earliestRequest, device);
+    std::cout << nextEvent << std::endl;
+
     switch(nextEvent)
     {
-      case NextEvent::SETTING_TO_DEVICE:
-      {
-        Request selectedRequest = buffer_.selectRequest();
-        currentTime_ = device.calculateServiceTime(currentTime_);
-        break;
-      }
       case NextEvent::SETTING_TO_BUFFER:
       {
         if(buffer_.isFull()){
@@ -90,28 +91,55 @@ void QueuingSystem::startSystem()
         requestsToBuffer.erase(std::remove(requestsToBuffer.begin(), requestsToBuffer.end(), earliestRequest));
         currentTime_ = earliestRequest.generationTime;
         buffer_.receiveRequest(earliestRequest);
+        std::cout << "Request from source " << earliestRequest.sourceNumber << " " << earliestRequest.generationTime << "-->>" << " buffer" << std::endl;
         Request newRequest = sources_[earliestRequest.sourceNumber].generateRequest(currentTime_);
         requestsToBuffer.push_back(newRequest);
       break;
       }
+      case NextEvent::SETTING_TO_DEVICE:
+      {
+        currentTime_ = devices_[device.getDeviceNumber()].getReleaseTime();
+        Request selectedRequest = buffer_.selectRequest();
+        double serviceTime = devices_[device.getDeviceNumber()].calculateServiceTime(currentTime_);
+        sources_[selectedRequest.sourceNumber].increaseProcessedRequestCount();
+        std::cout << "Request from buffer " << earliestRequest.sourceNumber << " " << earliestRequest.generationTime << "-->>" << device.getDeviceNumber() << std::endl;
+        break;
+      }
+      case NextEvent::FROM_SOURCE_TO_DEVICE:
+      {
+        currentTime_ = earliestRequest.generationTime;
+        requestsToBuffer.erase(std::remove(requestsToBuffer.begin(), requestsToBuffer.end(), earliestRequest));
+
+        std::cout << "Request from source " << earliestRequest.sourceNumber << " " << earliestRequest.generationTime << "-->>" << device.getDeviceNumber() << std::endl;
+
+        double serviceTime = devices_[device.getDeviceNumber()].calculateServiceTime(currentTime_);
+        sources_[earliestRequest.sourceNumber].increaseProcessedRequestCount();
+        Request newRequest = sources_[earliestRequest.sourceNumber].generateRequest(currentTime_);
+        requestsToBuffer.push_back(newRequest);
+        break;
+      }
     }
-  }
+    /////////////////////////////////////////////////////////////////////////////////
+        Sleep(1000);
+        for(auto device: devices_){
+            std::cout << "device " << device.getDeviceNumber() << "-" << device.getReleaseTime() << std::endl;
+        }
+        std::cout << "requests left " << currentTime_ << std::endl;
+        for(auto request: requestsToBuffer){
+            std::cout << request.sourceNumber << " " << request.generationTime << std::endl;
+        }
+        std::cout << "requests in buffer: " << std::endl;
+        for(auto request: buffer_.getRequests())
+        {
+          std::cout << request.sourceNumber << " " << request.generationTime << "\n";
+        }
+        std::cout << "\n";
+        for(auto source: sources_)
+        {
+          std::cout << "source " << source.getSourceNumber() << " " << source.getDeniedRequestsCount() << " " << source.getProcessedRequestsCount() << "\n";
+        }
+        std::cout << "-----------------" << std::endl;
 
-
-
-      Request selectedRequest = buffer_.selectRequest();
-      currentTime_ = device.calculateServiceTime(currentTime_);
-
-
-
-/////////////////////////////////////////////////////////////////////////////////
-    Sleep(1000);
-    std::cout << "requests left " << currentTime_ << std::endl;
-    for(auto request: requestsToBuffer){
-        std::cout << request.sourceNumber << " " << request.generationTime << std::endl;
-    }
-    std::cout << "-----------------" << std::endl;
-
-/////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////
   }
 }

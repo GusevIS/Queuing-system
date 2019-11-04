@@ -21,15 +21,6 @@ void Buffer::receiveRequest(Request request)
     requests_.erase(requests_.begin());
     requests_.push_back(request);
   }
-
-#ifdef _DEBUG
-    std::cout << "requests in buffer: " << std::endl;
-    for(auto &request: requests_)
-    {
-      std::cout << request.sourceNumber << " " << request.generationTime << "\n";
-    }
-    std::cout << "\n";
-#endif
 }
 
 bool Buffer::isFull() const
@@ -48,6 +39,13 @@ Request Buffer::selectRequest()
                                                                       [](const Request &req1, const Request &req2){
       return req1.sourceNumber < req2.sourceNumber;
     });
-    requests_.erase(std::remove(requests_.begin(), requests_.end(), selectedRequest));
+    requests_.erase(std::remove_if(requests_.begin(), requests_.end(), [selectedRequest](Request &req1){
+      return (req1.sourceNumber == selectedRequest->sourceNumber) && (req1.generationTime == selectedRequest->generationTime);
+    }));
   return *selectedRequest;
+}
+
+std::vector<Request> Buffer::getRequests() const
+{
+  return requests_;
 }

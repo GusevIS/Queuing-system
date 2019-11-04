@@ -14,8 +14,9 @@ double Device::calculateServiceTime(double currentTime)
   double randNumber = 0;
   while (randNumber == 1.0 || randNumber == 0.0)
     randNumber = rand() * fraction;
-  releaseTime_ = currentTime + (randNumber * (10 - 0) + 0);
-  return releaseTime_;
+  double serviceTime = (randNumber * (10 - 0) + 0);
+  releaseTime_ = currentTime + serviceTime;
+  return serviceTime;
 }
 
 bool Device::isFree(double currentTime) const
@@ -31,4 +32,9 @@ double Device::getReleaseTime() const
 void Device::setReleaseTime(double time)
 {
   releaseTime_ = time;
+}
+
+int Device::getDeviceNumber() const
+{
+  return deviceNumber_;
 }

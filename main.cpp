@@ -6,7 +6,7 @@
 int main(int argc, char *argv[])
 {
     srand(static_cast<unsigned int>(time(0)));
-    QueuingSystem queuingSystem(6, 3, 3, 3, 4);
+    QueuingSystem queuingSystem(4, 3, 3, 3, 8);
 
 #ifdef _DEBUG
     std::cout << "system online" << std::endl;

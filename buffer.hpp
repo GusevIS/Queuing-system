@@ -15,6 +15,7 @@ public:
   bool isEmpty() const;
   int getSrcNumberOfOldestRequest();
   Request selectRequest();
+  std::vector<Request> getRequests() const;
 
 
 private:
