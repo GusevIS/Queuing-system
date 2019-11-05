@@ -1,5 +1,3 @@
-#define _DEBUG
-
 #include "buffer.hpp"
 
 Buffer::Buffer(unsigned int bufferSize):
@@ -30,7 +28,7 @@ bool Buffer::isFull() const
 
 bool Buffer::isEmpty() const
 {
-  return (requests_.empty());
+  return requests_.empty();
 }
 
 Request Buffer::selectRequest()
@@ -48,4 +46,9 @@ Request Buffer::selectRequest()
 std::vector<Request> Buffer::getRequests() const
 {
   return requests_;
+}
+
+void Buffer::setBufferSize(unsigned int bufferSize)
+{
+  bufferSize_ = bufferSize;
 }

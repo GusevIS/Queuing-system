@@ -7,4 +7,16 @@ struct Request
   double generationTime;
 };
 
+struct ResultSet
+{
+  int sourceNumber;
+  double probabilityOfFailure;
+  int processedReqNumber;
+  int failedRequestsNumber;
+  int generateReqNumber;
+  double bufferTime;
+  double systemTime;
+  double processingTime;
+};
+
 #endif // REQUEST_H

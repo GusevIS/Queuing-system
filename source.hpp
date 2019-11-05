@@ -18,6 +18,11 @@ public:
   int getProcessedRequestsCount() const;
   void setProcessedRequestsCount(int processedRequestsCount);
   int getSourceNumber() const;
+  int getRequestCount() const;
+  void addBufferTime(double bufferTime);
+  double getBufferTime() const;
+  void addProcessingTime(double processingTime);
+  double getProcessingTime() const;
 
 private:
   double lambda_;
@@ -25,7 +30,8 @@ private:
   const int sourceNumber_;
   int deniedRequestsCount_;
   int processedRequestCount_;
-
+  double bufferTime_;
+  double processingTime_;
 };
 
 #endif // SOURCE_H

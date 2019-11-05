@@ -19,7 +19,6 @@ SOURCES += \
     buffer.cpp \
     device.cpp \
     main.cpp \
-    mainwindow.cpp \
     queuingsystem.cpp \
     source.cpp
 
@@ -27,7 +26,6 @@ HEADERS += \
     Request.h \
     buffer.hpp \
     device.hpp \
-    mainwindow.hpp \
     queuingsystem.hpp \
     source.hpp
 

@@ -16,10 +16,10 @@ public:
   int getSrcNumberOfOldestRequest();
   Request selectRequest();
   std::vector<Request> getRequests() const;
-
+  void setBufferSize(unsigned int bufferSize);
 
 private:
-  const unsigned int bufferSize_;
+  unsigned int bufferSize_;
   std::vector<Request> requests_;
 };
 

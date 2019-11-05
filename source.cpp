@@ -7,7 +7,9 @@ Source::Source(double lambda, int sourceNumber):
   requestsCount_(0),
   sourceNumber_(sourceNumber),
   deniedRequestsCount_(0),
-  processedRequestCount_(0)
+  processedRequestCount_(0),
+  bufferTime_(0),
+  processingTime_(0)
 {
   std::cout << sourceNumber << std::endl;
 }
@@ -58,4 +60,29 @@ void Source::setProcessedRequestsCount(int processedRequestsCount)
 int Source::getSourceNumber() const
 {
   return sourceNumber_;
+}
+
+int Source::getRequestCount() const
+{
+  return requestsCount_;
+}
+
+void Source::addBufferTime(double bufferTime)
+{
+  bufferTime_ += bufferTime;
+}
+
+double Source::getBufferTime() const
+{
+  return bufferTime_;
+}
+
+double Source::getProcessingTime() const
+{
+  return processingTime_;
+}
+
+void Source::addProcessingTime(double processingTime)
+{
+  processingTime_ += processingTime;
 }
