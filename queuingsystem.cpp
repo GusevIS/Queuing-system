@@ -144,11 +144,10 @@ void QueuingSystem::startSystem()
         currentTime_ = earliestRequest.generationTime;
         if(buffer_.isFull()){
           sources_[buffer_.getSrcNumberOfOldestRequest()].increaseDeniedRequestsCount();
-          sources_[buffer_.getSrcNumberOfOldestRequest()].addBufferTime(currentTime_);
         }
         generatedRequests_.erase(std::remove(generatedRequests_.begin(), generatedRequests_.end(), earliestRequest));
+        earliestRequest.waitingTime = - currentTime_;
         buffer_.receiveRequest(earliestRequest);
-        sources_[earliestRequest.sourceNumber].addBufferTime(- currentTime_);
         std::cout << "Request from source " << earliestRequest.sourceNumber << " " << earliestRequest.generationTime << "-->>" << " buffer" << std::endl;
 
         if(sources_[earliestRequest.sourceNumber].getRequestCount() < numberOfRequests_){
@@ -164,8 +163,10 @@ void QueuingSystem::startSystem()
         Request selectedRequest = buffer_.selectRequest();
         double serviceTime = devices_[device.getDeviceNumber()].calculateServiceTime(currentTime_);
         sources_[selectedRequest.sourceNumber].increaseProcessedRequestCount();
-        sources_[selectedRequest.sourceNumber].addBufferTime(currentTime_);
+        selectedRequest.waitingTime += currentTime_;
+        sources_[selectedRequest.sourceNumber].addBufferTime(selectedRequest.waitingTime);
         sources_[selectedRequest.sourceNumber].addProcessingTime(serviceTime);
+        std::cout << "Request from source " << selectedRequest.sourceNumber << " " << selectedRequest.generationTime << "-->>" << device.getDeviceNumber() << std::endl;
         break;
       }
       case NextEvent::FROM_SOURCE_TO_DEVICE:

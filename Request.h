@@ -5,6 +5,7 @@ struct Request
 {
   int sourceNumber;
   double generationTime;
+  double waitingTime;
 };
 
 struct ResultSet

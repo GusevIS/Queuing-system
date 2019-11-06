@@ -21,7 +21,7 @@ Request Source::generateRequest(double currentTime)
     randNumber = rand() * fraction;
   double generationTime = currentTime + (-log(randNumber)/lambda_);
 
-  Request request{sourceNumber_, generationTime};
+  Request request{sourceNumber_, generationTime, 0};
   requestsCount_++;
 
   return request;

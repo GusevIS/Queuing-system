@@ -14,7 +14,7 @@ double Device::calculateServiceTime(double currentTime)
   double randNumber = 0;
   while (randNumber == 1.0 || randNumber == 0.0)
     randNumber = rand() * fraction;
-  double serviceTime = (randNumber * (10 - 0) + 0);
+  double serviceTime = (randNumber * (5 - 0) + 0);
   releaseTime_ = currentTime + serviceTime;
   return serviceTime;
 }
