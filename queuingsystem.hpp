@@ -10,17 +10,11 @@
 #include "buffer.hpp"
 #include "device.hpp"
 #include "source.hpp"
+#include "event.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
-
-enum NextEvent
-{
-  SETTING_TO_BUFFER,
-  SETTING_TO_DEVICE,
-  FROM_SOURCE_TO_DEVICE
-};
 
 class QueuingSystem: public QMainWindow
 {
@@ -32,10 +26,15 @@ public:
   void initializeSystem(int numberOfSources, int numberOfRequests,
                         int numberOfDevices, double lambda, unsigned int bufferSize);
   void startSystem();
+  Event executeNextEvent();
+
   Request chooseEarliestRequest(std::vector<Request> requestsToBuffer) const;
   Device chooseDevice(std::vector<Device> devices) const;
-  NextEvent determineNextEvent() const;
+  EventType determineNextEvent() const;
   bool requiredReqNumberGenerated() const;
+
+  std::list<Event> events() const;
+  void setEvents(const std::list<Event> &events);
 
 private slots:
   void on_autoSimulateBtn_clicked();
@@ -50,6 +49,7 @@ private:
   Buffer buffer_;
   double currentTime_;
   int numberOfRequests_;
+  std::list<Event> events_;
 };
 
 #endif // QUEUINGSYSTEM_H

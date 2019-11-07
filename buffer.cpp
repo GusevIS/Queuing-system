@@ -6,9 +6,22 @@ Buffer::Buffer(unsigned int bufferSize):
 
 }
 
+Request Buffer::findNextRequest(std::vector<Request>::iterator first, std::vector<Request>::iterator last) const
+{
+  if (first == last)
+    return *last;
+  std::vector<Request>::iterator smallest = first;
+  ++first;
+  for (; first != last; ++first) {
+    if ((*first).getSourceNumber() <= (*smallest).getSourceNumber())
+      smallest = first;
+  }
+  return *smallest;
+}
+
 int Buffer::getSrcNumberOfOldestRequest()
 {
-  return requests_.front().sourceNumber;
+  return requests_.front().getSourceNumber();
 }
 
 void Buffer::receiveRequest(Request request)
@@ -33,14 +46,11 @@ bool Buffer::isEmpty() const
 
 Request Buffer::selectRequest()
 {
-    std::vector<Request>::iterator selectedRequest = std::min_element(requests_.begin(), requests_.end(),
-                                                                      [](const Request &req1, const Request &req2){
-      return req1.sourceNumber < req2.sourceNumber;
-    });
+    Request selectedRequest = findNextRequest(requests_.begin(), requests_.end());
     requests_.erase(std::remove_if(requests_.begin(), requests_.end(), [selectedRequest](Request &req1){
-      return (req1.sourceNumber == selectedRequest->sourceNumber) && (req1.generationTime == selectedRequest->generationTime);
+      return (req1.getSourceNumber() == selectedRequest.getSourceNumber()) && (req1.getGenerationTime() == selectedRequest.getGenerationTime());
     }));
-  return *selectedRequest;
+  return selectedRequest;
 }
 
 std::vector<Request> Buffer::getRequests() const

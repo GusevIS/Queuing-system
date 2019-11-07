@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <iostream>
+#include <string>
 #include "Request.h"
 
 class Source
