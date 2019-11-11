@@ -18,6 +18,9 @@ public:
   Request selectRequest();
   std::vector<Request> getRequests() const;
   void setBufferSize(unsigned int bufferSize);
+  int getNumberOfRequests() const;
+
+  unsigned int getBufferSize() const;
 
 private:
   unsigned int bufferSize_;

@@ -53,9 +53,19 @@ Request Buffer::selectRequest()
   return selectedRequest;
 }
 
+int Buffer::getNumberOfRequests() const
+{
+  return requests_.size();
+}
+
+unsigned int Buffer::getBufferSize() const
+{
+    return bufferSize_;
+}
+
 std::vector<Request> Buffer::getRequests() const
 {
-  return requests_;
+    return requests_;
 }
 
 void Buffer::setBufferSize(unsigned int bufferSize)

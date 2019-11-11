@@ -4,19 +4,31 @@
 #include <cmath>
 #include <iostream>
 
+#include "Request.h"
+
+const std::string freeStatus = "free";
+const std::string busyStatus = "service ";
+
 class Device
 {
 public:
-  Device(int deviceNumber);
-  double calculateServiceTime(double currentTime);
+  Device(int deviceNumber, int alpha, int beta);
+  double calculateServiceTime(double currentTime, Request request);
   bool isFree(double currentTime) const;
   double getReleaseTime() const;
   void setReleaseTime(double time);
   int getDeviceNumber() const;
 
+  std::string getStatus() const;
+  void setStatus(const std::string &status);
+
+  void updateStatus(double currentTime);
+
 private:
   double releaseTime_;
   const int deviceNumber_;
+  int alpha_, beta_;
+  std::string status_;
 };
 
 #endif // DEVICE_H

@@ -17,7 +17,8 @@ QueuingSystem::~QueuingSystem()
 }
 
 void QueuingSystem::initializeSystem(int numberOfSources, int numberOfRequests,
-                      int numberOfDevices, double lambda, unsigned int bufferSize)
+                      int numberOfDevices, double lambda, unsigned int bufferSize,
+                      int alpha, int beta)
 {
   buffer_ = bufferSize;
   currentTime_ = 0;
@@ -30,7 +31,7 @@ void QueuingSystem::initializeSystem(int numberOfSources, int numberOfRequests,
   }
 
   for (int i = 0; i < numberOfDevices; i++){
-    Device device(i);
+    Device device(i, alpha, beta);
     devices_.push_back(device);
   }
 }
@@ -51,26 +52,61 @@ void QueuingSystem::on_applyBtn_clicked()
   int sourcesNumber = ui->numSourcesInputLine->text().toInt();
   int devicesNumber = ui->numDevicesInputLine->text().toInt();
   int requestsNumber = ui->numRequestInputLine->text().toInt();
-  initializeSystem(sourcesNumber, requestsNumber, devicesNumber, lambda, bufferSize);
+  int alpha = ui->alphaInputLine->text().toInt();
+  int beta = ui->betaInputLine->text().toInt();
+  initializeSystem(sourcesNumber, requestsNumber, devicesNumber, lambda, bufferSize, alpha, beta);
 }
 
-std::list<Event> QueuingSystem::events() const
+std::vector<Event> QueuingSystem::events() const
 {
     return events_;
 }
 
-void QueuingSystem::setEvents(const std::list<Event> &events)
+void QueuingSystem::setEvents(const std::vector<Event> &events)
 {
     events_ = events;
 }
 
+void QueuingSystem::showStepStates() const
+{
+  ui->timeTextBrowser->setText(QString::number(events_[currentStep_].getSystemTime()));
+  ui->bufferStateTextBrowser->setText(QString::number(events_[currentStep_].getNumberOfRequestsInBuffer()) + QString::fromStdString("/" + std::to_string(buffer_.getBufferSize())));
+  ui->stepCountTextBrowser->setText(QString::number(events_.size()));
+
+  std::vector<DeviceStatus>deviceStatuses = events_[currentStep_].getDevicesIsBusy();
+  ui->deviceStatusTableWidget->setRowCount(0);
+  for(auto device: deviceStatuses){
+    ui->deviceStatusTableWidget->insertRow(ui->deviceStatusTableWidget->rowCount());
+    ui->deviceStatusTableWidget->setItem(ui->deviceStatusTableWidget->rowCount() - 1, 0, new QTableWidgetItem(QString::number(device.deviceNumber)));
+    ui->deviceStatusTableWidget->setItem(ui->deviceStatusTableWidget->rowCount() - 1, 1, new QTableWidgetItem(QString::fromStdString(device.status)));
+  }
+  ui->deviceStatusTableWidget->horizontalHeader()->setSectionResizeMode(1 , QHeaderView::Stretch);
+  ui->changeLogTextBrowser->setText(QString::fromStdString(events_[currentStep_].getChangeLog()));
+
+  std::vector<SourceStatus>sourceStatuses = events_[currentStep_].getSourcesStatuses();
+  ui->sourceStatusTableWidget->setRowCount(0);
+  for(auto source: sourceStatuses){
+    ui->sourceStatusTableWidget->insertRow(ui->sourceStatusTableWidget->rowCount());
+    ui->sourceStatusTableWidget->setItem(ui->sourceStatusTableWidget->rowCount() - 1, 0, new QTableWidgetItem(QString::number(source.sourceNumber )));
+
+    QString qString;
+    if(source.isIdle)
+      qString = "Idle";
+    else
+      qString = "generate Request";
+
+    ui->sourceStatusTableWidget->setItem(ui->sourceStatusTableWidget->rowCount() - 1, 1, new QTableWidgetItem(qString));
+  }
+}
+
 void QueuingSystem::on_autoSimulateBtn_clicked()
 {
-    startSystem();
-    for(auto source: sources_){
-        ResultSet resultSet{source.getSourceNumber(), (static_cast<double>(source.getDeniedRequestsCount())  / static_cast<double>(source.getRequestCount())),
-                       source.getProcessedRequestsCount(), source.getDeniedRequestsCount(), source.getRequestCount(), (source.getBufferTime() / source.getProcessedRequestsCount()),
-                       (source.getBufferTime() + source.getProcessingTime()) / source.getProcessedRequestsCount(), source.getProcessingTime() / source.getProcessedRequestsCount()};
+  startSystem();
+  ui->tableWidget->setRowCount(0);
+  for(auto source: sources_){
+    ResultSet resultSet{source.getSourceNumber(), (static_cast<double>(source.getDeniedRequestsCount())  / static_cast<double>(source.getRequestCount())),
+                        source.getProcessedRequestsCount(), source.getDeniedRequestsCount(), source.getRequestCount(), (source.getBufferTime() / source.getProcessedRequestsCount()),
+                        (source.getBufferTime() + source.getProcessingTime()) / source.getProcessedRequestsCount(), source.getProcessingTime() / source.getProcessedRequestsCount()};
     ui->tableWidget->insertRow(ui->tableWidget->rowCount());
     ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 0, new QTableWidgetItem(QString::number(resultSet.sourceNumber)));
     ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 1, new QTableWidgetItem(QString::number(resultSet.generateReqNumber)));
@@ -80,6 +116,30 @@ void QueuingSystem::on_autoSimulateBtn_clicked()
     ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 5, new QTableWidgetItem(QString::number(resultSet.processingTime)));
     ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 6, new QTableWidgetItem(QString::number(resultSet.probabilityOfFailure)));
   }
+}
+
+void QueuingSystem::on_enterStepBtn_clicked()
+{
+  int stepNumber = ui->steplineEdit->text().toInt();
+  currentStep_ = stepNumber;
+
+  showStepStates();
+}
+
+void QueuingSystem::on_nextStepBtn_clicked()
+{
+  if(currentStep_ < events_.size())
+    currentStep_++;
+  ui->steplineEdit->setText(QString::number(currentStep_));
+  showStepStates();
+}
+
+void QueuingSystem::on_prevStepBtn_clicked()
+{
+  if(currentStep_ > 0)
+    currentStep_--;
+  ui->steplineEdit->setText(QString::number(currentStep_));
+  showStepStates();
 }
 
 bool operator== (const Request &request1, const Request &request2)
@@ -127,89 +187,25 @@ EventType QueuingSystem::determineNextEvent() const
     return EventType::SETTING_TO_BUFFER;
 }
 
+void QueuingSystem::updateDevices()
+{
+  for(auto device: devices_)
+  {
+    device.updateStatus(currentTime_);
+  }
+}
+
 void QueuingSystem::startSystem()
 {
   for(auto &source: sources_)
   {
     Request newRequest = source.generateRequest(currentTime_);
     generatedRequests_.push_back(newRequest);                               //generate first requests from sources
-    std::cout << newRequest.getSourceNumber() << " " << newRequest.getGenerationTime() << "\n";
   }
 
-  std::cout << "\n";
-
-  while(true){
+  while(!(buffer_.isEmpty() && generatedRequests_.empty())){
     Event event = executeNextEvent();
     events_.push_back(event);
-  }
-
-  while (!(buffer_.isEmpty() && generatedRequests_.empty()))
-  {
-
-//    Request earliestRequest = chooseEarliestRequest(generatedRequests_);
-//    Device device = chooseDevice(devices_);
-    NextEvent nextEvent = determineNextEvent();
-    std::cout << nextEvent << std::endl;
-
-    switch(nextEvent)
-    {
-      case NextEvent::SETTING_TO_BUFFER:
-      {
-
-
-
-        std::cout << "Request from source " << earliestRequest.getSourceNumber() << " " << earliestRequest.getGenerationTime() << "-->>" << " buffer" << std::endl;
-
-
-      break;
-      }
-      case NextEvent::SETTING_TO_DEVICE:
-      {
-
-      }
-      case NextEvent::FROM_SOURCE_TO_DEVICE:
-      {
-        Request earliestRequest = chooseEarliestRequest(generatedRequests_);
-        Device device = chooseDevice(devices_);
-        currentTime_ = earliestRequest.getGenerationTime();
-        generatedRequests_.erase(std::remove(generatedRequests_.begin(), generatedRequests_.end(), earliestRequest));
-
-        std::cout << "Request from source " << earliestRequest.getSourceNumber() << " " << earliestRequest.getGenerationTime() << "-->>" << device.getDeviceNumber() << std::endl;
-
-        double serviceTime = devices_[device.getDeviceNumber()].calculateServiceTime(currentTime_);
-        sources_[earliestRequest.getSourceNumber()].increaseProcessedRequestCount();
-        sources_[earliestRequest.getSourceNumber()].addProcessingTime(serviceTime);
-
-        if(sources_[earliestRequest.getSourceNumber()].getRequestCount() < numberOfRequests_){
-          Request newRequest = sources_[earliestRequest.getSourceNumber()].generateRequest(currentTime_);
-          generatedRequests_.push_back(newRequest);
-        }
-        break;
-      }
-    }
-    std::cout << buffer_.isEmpty() << generatedRequests_.empty() << std::endl;
-    /////////////////////////////////////////////////////////////////////////////////
-        //Sleep(1000);
-        for(auto device: devices_){
-            std::cout << "device " << device.getDeviceNumber() << "-" << device.getReleaseTime() << std::endl;
-        }
-        std::cout << "requests left " << currentTime_ << std::endl;
-        for(auto request: generatedRequests_){
-            std::cout << request.getSourceNumber() << " " << request.getGenerationTime() << std::endl;
-        }
-        std::cout << "requests in buffer: " << std::endl;
-        for(auto request: buffer_.getRequests())
-        {
-          std::cout << request.getSourceNumber() << " " << request.getGenerationTime() << "\n";
-        }
-        std::cout << "\n";
-        for(auto source: sources_)
-        {
-          std::cout << "source " << source.getSourceNumber() << " " << source.getRequestCount() << " " << source.getDeniedRequestsCount() << " " << source.getProcessedRequestsCount() << "\n";
-        }
-        std::cout << "-----------------" << std::endl;
-
-    /////////////////////////////////////////////////////////////////////////////////
   }
 }
 
@@ -217,6 +213,11 @@ Event QueuingSystem::executeNextEvent()
 {
   EventType eventType = determineNextEvent();
   std::string changeLog;
+  std::vector<SourceStatus> sourceStatuses;
+  for(auto source: sources_)
+  {
+    sourceStatuses.push_back( {source.getSourceNumber(), true} );
+  }
 
   switch (eventType)
   {
@@ -227,7 +228,7 @@ Event QueuingSystem::executeNextEvent()
     if(buffer_.isFull()){
       std::string sourceNumber = std::to_string(earliestRequest.getSourceNumber());
       std::string generationTime = std::to_string(earliestRequest.getGenerationTime());
-      changeLog += "Request from source " + sourceNumber + " " + generationTime + " failed";
+      changeLog += "Request from source " + sourceNumber + " " + generationTime + " failed;   ";
 
       sources_[buffer_.getSrcNumberOfOldestRequest()].increaseDeniedRequestsCount();
     }
@@ -237,11 +238,12 @@ Event QueuingSystem::executeNextEvent()
     if(sources_[earliestRequest.getSourceNumber()].getRequestCount() < numberOfRequests_){
       Request newRequest = sources_[earliestRequest.getSourceNumber()].generateRequest(currentTime_);
       generatedRequests_.push_back(newRequest);
+      sourceStatuses[earliestRequest.getSourceNumber()].isIdle = false;
     }
 
     std::string sourceNumber = std::to_string(earliestRequest.getSourceNumber());
     std::string generationTime = std::to_string(earliestRequest.getGenerationTime());
-    changeLog += "Request from source " + sourceNumber + " " + generationTime + "sent to" + " BUFFER";
+    changeLog += "Request from source " + sourceNumber + " " + generationTime + " sent to" + " BUFFER";
     break;
   }
   case EventType::SETTING_TO_DEVICE:
@@ -254,7 +256,7 @@ Event QueuingSystem::executeNextEvent()
     selectedRequest.calculateWaitingTime(currentTime_);
     sources_[selectedRequest.getSourceNumber()].addBufferTime(selectedRequest.getWaitingTime());
 
-    double serviceTime = devices_[device.getDeviceNumber()].calculateServiceTime(currentTime_);
+    double serviceTime = devices_[device.getDeviceNumber()].calculateServiceTime(currentTime_, selectedRequest);
     sources_[selectedRequest.getSourceNumber()].addProcessingTime(serviceTime);
 
     std::cout << "Request from source " << selectedRequest.getSourceNumber() << " " << selectedRequest.getGenerationTime() << "-->>" << device.getDeviceNumber() << std::endl;
@@ -273,13 +275,14 @@ Event QueuingSystem::executeNextEvent()
 
     std::cout << "Request from source " << earliestRequest.getSourceNumber() << " " << earliestRequest.getGenerationTime() << "-->>" << device.getDeviceNumber() << std::endl;
 
-    double serviceTime = devices_[device.getDeviceNumber()].calculateServiceTime(currentTime_);
+    double serviceTime = devices_[device.getDeviceNumber()].calculateServiceTime(currentTime_, earliestRequest);
     sources_[earliestRequest.getSourceNumber()].increaseProcessedRequestCount();
     sources_[earliestRequest.getSourceNumber()].addProcessingTime(serviceTime);
 
     if(sources_[earliestRequest.getSourceNumber()].getRequestCount() < numberOfRequests_){
       Request newRequest = sources_[earliestRequest.getSourceNumber()].generateRequest(currentTime_);
       generatedRequests_.push_back(newRequest);
+      sourceStatuses[earliestRequest.getSourceNumber()].isIdle = false;
     }
     std::string sourceNumber = std::to_string(earliestRequest.getSourceNumber());
     std::string generationTime = std::to_string(earliestRequest.getGenerationTime());
@@ -289,9 +292,37 @@ Event QueuingSystem::executeNextEvent()
   }
   }
 
-  std::vector<bool> devicesStatus;
-  for(auto device: devices_){
-    devicesStatus.push_back(!(device.getReleaseTime() == currentTime_));
+  for(auto device: devices_)
+  {
+    device.updateStatus(currentTime_);
   }
-  Event newEvent(eventType, currentTime_, changeLog, buffer_.getRequests().size(), devicesStatus);
+
+  std::vector<DeviceStatus> devicesStatus;
+  for(auto device: devices_){
+    devicesStatus.push_back( {device.getDeviceNumber(), device.getStatus()} );
+  }
+  Event newEvent(eventType, currentTime_, changeLog, buffer_.getRequests().size(), devicesStatus, sourceStatuses);
+
+/*
+  for(auto device: devices_){
+    std::cout << "device " << device.getDeviceNumber() << "-" << device.getStatus() << std::endl;
+  }
+  std::cout << "requests left " << currentTime_ << std::endl;
+  for(auto request: generatedRequests_){
+    std::cout << request.getSourceNumber() << " " << request.getGenerationTime() << std::endl;
+  }
+  std::cout << "requests in buffer: " << std::endl;
+  for(auto request: buffer_.getRequests())
+  {
+    std::cout << request.getSourceNumber() << " " << request.getGenerationTime() << "\n";
+  }
+  std::cout << "\n";
+  for(auto source: sources_)
+  {
+    std::cout << "source " << source.getSourceNumber() << " " << source.getRequestCount() << " " << source.getDeniedRequestsCount() << " " << source.getProcessedRequestsCount() << "\n";
+  }
+  std::cout << "-----------------" << std::endl;
+  */
+
+  return newEvent;
 }

@@ -11,10 +11,23 @@ enum EventType
   FROM_SOURCE_TO_DEVICE
 };
 
+struct DeviceStatus
+{
+  int deviceNumber;
+  std::string status;
+};
+
+struct SourceStatus
+{
+  int sourceNumber;
+  bool isIdle;
+};
+
 class Event
 {
 public:
-  Event(EventType eventType, double currentTime, std::string changeLog, int numberRequests, std::vector<bool> devicesStatus);
+  Event(EventType eventType, double currentTime, std::string changeLog, int numberRequests, std::vector<DeviceStatus> devicesStatus,
+        std::vector<SourceStatus> sourcesStatuses);
 
   EventType getEventType() const;
   void setEventType(const EventType &value);
@@ -28,8 +41,11 @@ public:
   int getNumberOfRequestsInBuffer() const;
   void setNumberOfRequestsInBuffer(int numberOfRequestsInBuffer);
 
-  bool getDeviceIsBusy() const;
-  void setDeviceIsBusy(bool deviceIsBusy);
+  std::vector<DeviceStatus> getDevicesIsBusy() const;
+  void setDeviceIsBusy(std::vector<DeviceStatus> devicesIsBusy);
+
+  std::vector<SourceStatus> getSourcesStatuses() const;
+  void setSourcesStatuses(const std::vector<SourceStatus> &value);
 
 private:
   EventType eventType_;
@@ -37,9 +53,8 @@ private:
 
   std::string changeLog_;
   int numberOfRequestsInBuffer_;
-  std::vector<bool> devicesIsBusy_;
-
-
+  std::vector<SourceStatus> sourcesStatuses_;
+  std::vector<DeviceStatus> devicesIsBusy_;
 };
 
 #endif // EVENT_H

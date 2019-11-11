@@ -7,6 +7,9 @@
 #include <string>
 #include "Request.h"
 
+const std::string idleStatus = "idle";
+const std::string generateStatus = "generate request";
+
 class Source
 {
 public:
@@ -24,6 +27,10 @@ public:
   double getBufferTime() const;
   void addProcessingTime(double processingTime);
   double getProcessingTime() const;
+
+
+  std::string getStatus() const;
+  void setStatus(const std::string &status);
 
 private:
   double lambda_;

@@ -5,6 +5,7 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include <iterator>
 #include <conio.h>
 #include <windows.h>
 #include "buffer.hpp"
@@ -24,21 +25,30 @@ public:
   QueuingSystem(QWidget *parent = nullptr);
   ~QueuingSystem();
   void initializeSystem(int numberOfSources, int numberOfRequests,
-                        int numberOfDevices, double lambda, unsigned int bufferSize);
+                        int numberOfDevices, double lambda, unsigned int bufferSize,
+                        int alpha, int beta);
   void startSystem();
   Event executeNextEvent();
+  void showStepStates() const;
 
   Request chooseEarliestRequest(std::vector<Request> requestsToBuffer) const;
   Device chooseDevice(std::vector<Device> devices) const;
   EventType determineNextEvent() const;
   bool requiredReqNumberGenerated() const;
+  void updateDevices();
 
-  std::list<Event> events() const;
-  void setEvents(const std::list<Event> &events);
+  std::vector<Event> events() const;
+  void setEvents(const std::vector<Event> &events);
 
 private slots:
   void on_autoSimulateBtn_clicked();
   void on_applyBtn_clicked();
+
+  void on_enterStepBtn_clicked();
+
+  void on_nextStepBtn_clicked();
+
+  void on_prevStepBtn_clicked();
 
 private:
   Ui::MainWindow *ui;
@@ -49,7 +59,8 @@ private:
   Buffer buffer_;
   double currentTime_;
   int numberOfRequests_;
-  std::list<Event> events_;
+  std::vector<Event> events_;
+  int currentStep_ = 0;
 };
 
 #endif // QUEUINGSYSTEM_H

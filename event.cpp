@@ -1,8 +1,13 @@
 #include "event.h"
 
-Event::Event(EventType eventType, double currentTime):
+Event::Event(EventType eventType, double currentTime, std::string changeLog, int numberRequests, std::vector<DeviceStatus> devicesStatus,
+             std::vector<SourceStatus> sourcesStatuses):
   eventType_(eventType),
-  systemTime_(currentTime)
+  systemTime_(currentTime),
+  changeLog_(changeLog),
+  numberOfRequestsInBuffer_(numberRequests),
+  sourcesStatuses_(sourcesStatuses),
+  devicesIsBusy_(devicesStatus)
 {
 
 }
@@ -47,12 +52,22 @@ void Event::setNumberOfRequestsInBuffer(int numberOfRequestsInBuffer)
     numberOfRequestsInBuffer_ = numberOfRequestsInBuffer;
 }
 
-bool Event::getDeviceIsBusy() const
+std::vector<DeviceStatus> Event::getDevicesIsBusy() const
 {
-    return deviceIsBusy_;
+    return devicesIsBusy_;
 }
 
-void Event::setDeviceIsBusy(bool deviceIsBusy)
+void Event::setDeviceIsBusy(std::vector<DeviceStatus> devicesIsBusy)
 {
-    deviceIsBusy_ = deviceIsBusy;
+    devicesIsBusy_ = devicesIsBusy;
+}
+
+std::vector<SourceStatus> Event::getSourcesStatuses() const
+{
+    return sourcesStatuses_;
+}
+
+void Event::setSourcesStatuses(const std::vector<SourceStatus> &value)
+{
+    sourcesStatuses_ = value;
 }
