@@ -105,7 +105,7 @@ void QueuingSystem::on_autoSimulateBtn_clicked()
   ui->tableWidget->setRowCount(0);
   for(auto source: sources_){
     ResultSet resultSet{source.getSourceNumber(), (static_cast<double>(source.getDeniedRequestsCount())  / static_cast<double>(source.getRequestCount())),
-                        source.getProcessedRequestsCount(), source.getDeniedRequestsCount(), source.getRequestCount(), (source.getBufferTime() / source.getProcessedRequestsCount()),
+                        source.getProcessedRequestsCount(), source.getDeniedRequestsCount(), source.getRequestCount(), (source.getBufferTime() / source.getRequestCount()),
                         (source.getBufferTime() + source.getProcessingTime()) / source.getProcessedRequestsCount(), source.getProcessingTime() / source.getProcessedRequestsCount()};
     ui->tableWidget->insertRow(ui->tableWidget->rowCount());
     ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 0, new QTableWidgetItem(QString::number(resultSet.sourceNumber)));
@@ -189,7 +189,7 @@ EventType QueuingSystem::determineNextEvent() const
 
 void QueuingSystem::updateDevices()
 {
-  for(auto device: devices_)
+  for(auto &device: devices_)
   {
     device.updateStatus(currentTime_);
   }
@@ -200,7 +200,7 @@ void QueuingSystem::startSystem()
   for(auto &source: sources_)
   {
     Request newRequest = source.generateRequest(currentTime_);
-    generatedRequests_.push_back(newRequest);                               //generate first requests from sources
+    generatedRequests_.push_back(newRequest);
   }
 
   while(!(buffer_.isEmpty() && generatedRequests_.empty())){
@@ -228,6 +228,10 @@ Event QueuingSystem::executeNextEvent()
     if(buffer_.isFull()){
       std::string sourceNumber = std::to_string(earliestRequest.getSourceNumber());
       std::string generationTime = std::to_string(earliestRequest.getGenerationTime());
+
+      Request failedRequest = buffer_.getFailedRequest();
+      failedRequest.calculateWaitingTime(currentTime_);
+      sources_[failedRequest.getSourceNumber()].addBufferTime(failedRequest.getWaitingTime());
       changeLog += "Request from source " + sourceNumber + " " + generationTime + " failed;   ";
 
       sources_[buffer_.getSrcNumberOfOldestRequest()].increaseDeniedRequestsCount();
@@ -292,10 +296,7 @@ Event QueuingSystem::executeNextEvent()
   }
   }
 
-  for(auto device: devices_)
-  {
-    device.updateStatus(currentTime_);
-  }
+  updateDevices();
 
   std::vector<DeviceStatus> devicesStatus;
   for(auto device: devices_){

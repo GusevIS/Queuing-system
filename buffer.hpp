@@ -16,6 +16,7 @@ public:
   bool isEmpty() const;
   int getSrcNumberOfOldestRequest();
   Request selectRequest();
+  Request getFailedRequest();
   std::vector<Request> getRequests() const;
   void setBufferSize(unsigned int bufferSize);
   int getNumberOfRequests() const;

@@ -46,11 +46,16 @@ bool Buffer::isEmpty() const
 
 Request Buffer::selectRequest()
 {
-    Request selectedRequest = findNextRequest(requests_.begin(), requests_.end());
-    requests_.erase(std::remove_if(requests_.begin(), requests_.end(), [selectedRequest](Request &req1){
-      return (req1.getSourceNumber() == selectedRequest.getSourceNumber()) && (req1.getGenerationTime() == selectedRequest.getGenerationTime());
-    }));
+  Request selectedRequest = findNextRequest(requests_.begin(), requests_.end());
+  requests_.erase(std::remove_if(requests_.begin(), requests_.end(), [selectedRequest](Request &req1){
+    return (req1.getSourceNumber() == selectedRequest.getSourceNumber()) && (req1.getGenerationTime() == selectedRequest.getGenerationTime());
+  }));
   return selectedRequest;
+}
+
+Request Buffer::getFailedRequest()
+{
+  return requests_.front();
 }
 
 int Buffer::getNumberOfRequests() const

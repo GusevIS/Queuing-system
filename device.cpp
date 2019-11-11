@@ -7,7 +7,7 @@ Device::Device(int deviceNumber, int alpha, int beta):
   deviceNumber_(deviceNumber),
   alpha_(alpha),
   beta_(beta),
-  status_(freeStatus)
+  status_()
 {
 
 }
@@ -16,9 +16,7 @@ void Device::updateStatus(double currentTime)
 {
   if(currentTime > releaseTime_){
     status_ = freeStatus;
-    std::cout << deviceNumber_ << "  -  " << status_ << std::endl;
   }
-  std::cout << deviceNumber_ << "  +  " << status_ << std::endl;
 }
 
 double Device::calculateServiceTime(double currentTime, Request request)
@@ -61,9 +59,4 @@ std::string Device::getStatus() const
 void Device::setStatus(const std::string &status)
 {
   status_ = status;
-}
-
-void Device::setFreeStatus()
-{
-  status_ = freeStatus;
 }
