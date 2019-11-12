@@ -7,9 +7,7 @@ Source::Source(double lambda, int sourceNumber):
   requestsCount_(0),
   sourceNumber_(sourceNumber),
   deniedRequestsCount_(0),
-  processedRequestCount_(0),
-  bufferTime_(0),
-  processingTime_(0)
+  processedRequestCount_(0)
 {
   std::cout << sourceNumber << std::endl;
 }
@@ -69,20 +67,67 @@ int Source::getRequestCount() const
 
 void Source::addBufferTime(double bufferTime)
 {
-  bufferTime_ += bufferTime;
+  bufferTimes_.push_back(bufferTime);
 }
 
-double Source::getBufferTime() const
+std::list<double> Source::getBufferTime() const
 {
-  return bufferTime_;
+  return bufferTimes_;
 }
 
-double Source::getProcessingTime() const
+double Source::getAverageWaitingTime() const
 {
-  return processingTime_;
+  double totalWaitingTime = 0;
+  for(auto waitingTime: bufferTimes_)
+  {
+    totalWaitingTime += waitingTime;
+  }
+  return totalWaitingTime / requestsCount_;
+}
+
+std::list<double> Source::getProcessingTime() const
+{
+  return processingTimes_;
 }
 
 void Source::addProcessingTime(double processingTime)
 {
-  processingTime_ += processingTime;
+  processingTimes_.push_back(processingTime);
+}
+
+double Source::getAverageProcessingTime() const
+{
+    double totalProcessingTime = 0;
+    for(auto processingTime: processingTimes_)
+    {
+      totalProcessingTime += processingTime;
+    }
+  return totalProcessingTime / processedRequestCount_;
+}
+
+double Source::getAverageSystemTime() const
+{
+  return getAverageWaitingTime() + getAverageProcessingTime();
+}
+
+double Source::getDispersionOfWaitingTime() const
+{
+  double dispersion = 0;
+  double averageWaitingTime = getAverageWaitingTime();
+  for(auto waitingTime: bufferTimes_)
+  {
+    dispersion += pow(waitingTime - averageWaitingTime, 2);
+  }
+  return dispersion / (bufferTimes_.size() - 1);
+}
+
+double Source::getDispersionOfProcessingTime() const
+{
+  double dispersion = 0;
+  double averageProcessingTime = getAverageProcessingTime();
+  for(auto processingTime: processingTimes_)
+  {
+    dispersion += pow(processingTime - averageProcessingTime, 2);
+  }
+  return dispersion / (processingTimes_.size() - 1);
 }

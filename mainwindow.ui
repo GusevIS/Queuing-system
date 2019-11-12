@@ -398,7 +398,7 @@
       </column>
       <column>
        <property name="text">
-        <string>Requests number</string>
+        <string>SystemTime</string>
        </property>
       </column>
       <column>

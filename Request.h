@@ -40,6 +40,8 @@ struct ResultSet
   double bufferTime;
   double systemTime;
   double processingTime;
+  double dispersionServTime;
+  double dispersionWaitTime;
 };
 
 #endif // REQUEST_H
