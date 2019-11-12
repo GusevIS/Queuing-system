@@ -107,7 +107,7 @@ void QueuingSystem::on_autoSimulateBtn_clicked()
   for(auto source: sources_){
     ResultSet resultSet{source.getSourceNumber(), (static_cast<double>(source.getDeniedRequestsCount())  / static_cast<double>(source.getRequestCount())),
                         source.getProcessedRequestsCount(), source.getDeniedRequestsCount(), source.getRequestCount(), (source.getBufferTime() / source.getRequestCount()),
-                        (source.getBufferTime() + source.getProcessingTime()) / source.getProcessedRequestsCount(), source.getProcessingTime() / source.getProcessedRequestsCount()};
+                        (source.getBufferTime() + source.getProcessingTime()) / source.getProcessedRequestsCount(), source.getProcessingTime() / source.getProcessedRequestsCount(),};
     ui->tableWidget->insertRow(ui->tableWidget->rowCount());
     ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 0, new QTableWidgetItem(QString::number(resultSet.sourceNumber)));
     ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 1, new QTableWidgetItem(QString::number(resultSet.generateReqNumber)));
