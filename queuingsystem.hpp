@@ -40,6 +40,8 @@ public:
   std::vector<Event> events() const;
   void setEvents(const std::vector<Event> &events);
 
+  void calculateServiceCoefficient();
+
 private slots:
   void on_autoSimulateBtn_clicked();
   void on_applyBtn_clicked();

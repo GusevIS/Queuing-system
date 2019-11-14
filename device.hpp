@@ -24,11 +24,19 @@ public:
 
   void updateStatus(double currentTime);
 
+  double getTotalServiceTime() const;
+  void setTotalServiceTime(double totalServiceTime);
+
+  double getServiceCoefficient() const;
+  void setServiceCoefficient(double serviceCoefficient);
+
 private:
   double releaseTime_;
   const int deviceNumber_;
   int alpha_, beta_;
   std::string status_;
+  double totalServiceTime_;
+  double serviceCoefficient_;
 };
 
 #endif // DEVICE_H

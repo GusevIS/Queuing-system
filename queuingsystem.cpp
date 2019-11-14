@@ -103,22 +103,30 @@ void QueuingSystem::showStepStates() const
 void QueuingSystem::on_autoSimulateBtn_clicked()
 {
   startSystem();
-  ui->tableWidget->setRowCount(0);
+  ui->autoSourceTableWidget->setRowCount(0);
   for(auto source: sources_){
     ResultSet resultSet{source.getSourceNumber(), (static_cast<double>(source.getDeniedRequestsCount())  / static_cast<double>(source.getRequestCount())),
                         source.getProcessedRequestsCount(), source.getDeniedRequestsCount(), source.getRequestCount(), source.getAverageWaitingTime(),
                         source.getAverageSystemTime(), source.getAverageProcessingTime(), source.getDispersionOfProcessingTime(), source.getDispersionOfWaitingTime()
                        };
-    ui->tableWidget->insertRow(ui->tableWidget->rowCount());
-    ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 0, new QTableWidgetItem(QString::number(resultSet.sourceNumber)));
-    ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 1, new QTableWidgetItem(QString::number(resultSet.systemTime)));
-    ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 2, new QTableWidgetItem(QString::number(resultSet.processedReqNumber)));
-    ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 3, new QTableWidgetItem(QString::number(resultSet.failedRequestsNumber)));
-    ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 4, new QTableWidgetItem(QString::number(resultSet.bufferTime)));
-    ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 5, new QTableWidgetItem(QString::number(resultSet.processingTime)));
-    ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 6, new QTableWidgetItem(QString::number(resultSet.probabilityOfFailure)));
-    ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 7, new QTableWidgetItem(QString::number(resultSet.dispersionServTime)));
-    ui->tableWidget->setItem(ui->tableWidget->rowCount() - 1, 8, new QTableWidgetItem(QString::number(resultSet.dispersionWaitTime)));
+    ui->autoSourceTableWidget->insertRow(ui->autoSourceTableWidget->rowCount());
+    ui->autoSourceTableWidget->setItem(ui->autoSourceTableWidget->rowCount() - 1, 0, new QTableWidgetItem(QString::number(resultSet.sourceNumber)));
+    ui->autoSourceTableWidget->setItem(ui->autoSourceTableWidget->rowCount() - 1, 1, new QTableWidgetItem(QString::number(resultSet.systemTime)));
+    ui->autoSourceTableWidget->setItem(ui->autoSourceTableWidget->rowCount() - 1, 2, new QTableWidgetItem(QString::number(resultSet.processedReqNumber)));
+    ui->autoSourceTableWidget->setItem(ui->autoSourceTableWidget->rowCount() - 1, 3, new QTableWidgetItem(QString::number(resultSet.failedRequestsNumber)));
+    ui->autoSourceTableWidget->setItem(ui->autoSourceTableWidget->rowCount() - 1, 4, new QTableWidgetItem(QString::number(resultSet.bufferTime)));
+    ui->autoSourceTableWidget->setItem(ui->autoSourceTableWidget->rowCount() - 1, 5, new QTableWidgetItem(QString::number(resultSet.processingTime)));
+    ui->autoSourceTableWidget->setItem(ui->autoSourceTableWidget->rowCount() - 1, 6, new QTableWidgetItem(QString::number(resultSet.probabilityOfFailure)));
+    ui->autoSourceTableWidget->setItem(ui->autoSourceTableWidget->rowCount() - 1, 7, new QTableWidgetItem(QString::number(resultSet.dispersionServTime)));
+    ui->autoSourceTableWidget->setItem(ui->autoSourceTableWidget->rowCount() - 1, 8, new QTableWidgetItem(QString::number(resultSet.dispersionWaitTime)));
+  }
+
+  calculateServiceCoefficient();
+  ui->autoDeviceTableWidget->setRowCount(0);
+  for(auto device: devices_){
+    ui->autoDeviceTableWidget->insertRow(ui->autoDeviceTableWidget->rowCount());
+    ui->autoDeviceTableWidget->setItem(ui->autoDeviceTableWidget->rowCount() - 1, 0, new QTableWidgetItem(QString::number(device.getDeviceNumber())));
+    ui->autoDeviceTableWidget->setItem(ui->autoDeviceTableWidget->rowCount() - 1, 1, new QTableWidgetItem(QString::number(device.getServiceCoefficient())));
   }
 }
 
@@ -148,18 +156,30 @@ void QueuingSystem::on_prevStepBtn_clicked()
 
 bool operator== (const Request &request1, const Request &request2)
 {
-    return (request1.getGenerationTime() == request2.getGenerationTime() &&
-            request1.getSourceNumber() == request2.getSourceNumber());
+  return (request1.getGenerationTime() == request2.getGenerationTime() &&
+          request1.getSourceNumber() == request2.getSourceNumber());
 }
 
 bool operator< (const Request &request1, const Request &request2)
 {
-    return request1.getGenerationTime() < request2.getGenerationTime();
+  return request1.getGenerationTime() < request2.getGenerationTime();
 }
 
 bool operator< (const Device &device1, const Device &device2)
 {
-    return device1.getReleaseTime() < device2.getReleaseTime();
+  return device1.getReleaseTime() < device2.getReleaseTime();
+}
+
+void QueuingSystem::calculateServiceCoefficient()
+{
+  std::vector<double> serviceCoefficients;
+  auto lastFreeDevice = std::max_element(devices_.begin(), devices_.end(), [](const Device &dev1, const Device &dev2) {
+    return (dev1.getReleaseTime() < dev2.getReleaseTime());
+  });
+  for(auto &device: devices_)
+  {
+    device.setServiceCoefficient(device.getTotalServiceTime() / (*lastFreeDevice).getReleaseTime());
+  }
 }
 
 Request QueuingSystem::chooseEarliestRequest(std::vector<Request> generatedRequests_) const

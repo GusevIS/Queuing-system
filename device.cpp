@@ -7,7 +7,8 @@ Device::Device(int deviceNumber, int alpha, int beta):
   deviceNumber_(deviceNumber),
   alpha_(alpha),
   beta_(beta),
-  status_()
+  status_(),
+  serviceCoefficient_(0)
 {
 
 }
@@ -19,14 +20,35 @@ void Device::updateStatus(double currentTime)
   }
 }
 
+double Device::getTotalServiceTime() const
+{
+    return totalServiceTime_;
+}
+
+void Device::setTotalServiceTime(double totalServiceTime)
+{
+    totalServiceTime_ = totalServiceTime;
+}
+
+double Device::getServiceCoefficient() const
+{
+    return serviceCoefficient_;
+}
+
+void Device::setServiceCoefficient(double serviceCoefficient)
+{
+    serviceCoefficient_ = serviceCoefficient;
+}
+
 double Device::calculateServiceTime(double currentTime, Request request)
 {
-  double randNumber = 0;
-  while (randNumber == 1.0 || randNumber == 0.0)
-    randNumber = rand() * fraction;
-  double serviceTime = (randNumber * (alpha_ - beta_) + beta_);
+    double randNumber = 0;
+    while (randNumber == 1.0 || randNumber == 0.0)
+        randNumber = rand() * fraction;
+    double serviceTime = (randNumber * (alpha_ - beta_) + beta_);
   releaseTime_ = currentTime + serviceTime;
   status_ = busyStatus + "req from SOURCE " + std::to_string(request.getSourceNumber()) + " until " + std::to_string(releaseTime_);
+  totalServiceTime_ += serviceTime;
   return serviceTime;
 }
 
