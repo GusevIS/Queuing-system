@@ -52,11 +52,8 @@ public:
 private slots:
   void on_autoSimulateBtn_clicked();
   void on_applyBtn_clicked();
-
   void on_enterStepBtn_clicked();
-
   void on_nextStepBtn_clicked();
-
   void on_prevStepBtn_clicked();
 
 private:

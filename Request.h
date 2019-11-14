@@ -1,19 +1,11 @@
 #ifndef REQUEST_H
 #define REQUEST_H
 
-enum reqStatus{
-  GENERATED,
-  FAILED,
-  PROCESSED
-};
-
 class Request
 {
 public:
   Request(int sourceNumber, double generationTime);
   int getSourceNumber() const;
-  void setStatus(reqStatus status);
-  reqStatus getStatus() const;
   double getGenerationTime() const;
   void calculateWaitingTime(double currentTime);
   void setBufferArriveTime(double bufferArriveTime);
@@ -23,7 +15,6 @@ public:
 
 private:
   int sourceNumber_;
-  reqStatus status_;
   double generationTime_;
   double bufferArriveTime_;
   double waitingTime_;

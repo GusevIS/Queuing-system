@@ -2,7 +2,6 @@
 
 Request::Request(int sourceNumber, double generationTime):
   sourceNumber_(sourceNumber),
-  status_(GENERATED),
   generationTime_(generationTime),
   bufferArriveTime_(0),
   waitingTime_(0),
@@ -23,17 +22,7 @@ int Request::getSourceNumber() const
 
 double Request::getGenerationTime() const
 {
-    return generationTime_;
-}
-
-void Request::setStatus(reqStatus status)
-{
-  status_ = status;
-}
-
-reqStatus Request::getStatus() const
-{
-  return status_;
+  return generationTime_;
 }
 
 void Request::setBufferArriveTime(double bufferArriveTime)

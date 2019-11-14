@@ -348,27 +348,5 @@ Event QueuingSystem::executeNextEvent()
     devicesStatus.push_back( {device.getDeviceNumber(), device.getStatus()} );
   }
   Event newEvent(eventType, currentTime_, changeLog, buffer_.getRequests().size(), devicesStatus, sourceStatuses);
-
-/*
-  for(auto device: devices_){
-    std::cout << "device " << device.getDeviceNumber() << "-" << device.getStatus() << std::endl;
-  }
-  std::cout << "requests left " << currentTime_ << std::endl;
-  for(auto request: generatedRequests_){
-    std::cout << request.getSourceNumber() << " " << request.getGenerationTime() << std::endl;
-  }
-  std::cout << "requests in buffer: " << std::endl;
-  for(auto request: buffer_.getRequests())
-  {
-    std::cout << request.getSourceNumber() << " " << request.getGenerationTime() << "\n";
-  }
-  std::cout << "\n";
-  for(auto source: sources_)
-  {
-    std::cout << "source " << source.getSourceNumber() << " " << source.getRequestCount() << " " << source.getDeniedRequestsCount() << " " << source.getProcessedRequestsCount() << "\n";
-  }
-  std::cout << "-----------------" << std::endl;
-  */
-
   return newEvent;
 }
