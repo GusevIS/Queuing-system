@@ -14,17 +14,18 @@ QueuingSystem::QueuingSystem(QWidget *parent):
 
 QueuingSystem::~QueuingSystem()
 {
-    delete ui;
+  delete ui;
 }
 
 void QueuingSystem::initializeSystem(int numberOfSources, int numberOfRequests,
                       int numberOfDevices, double lambda, unsigned int bufferSize,
                       int alpha, int beta)
 {
-  buffer_ = bufferSize;
+  buffer_.setBufferSize(bufferSize);
   currentTime_ = 0;
   numberOfRequests_ = numberOfRequests;
-  systemIsActive_ = true;
+  sources_.clear();
+  devices_.clear();
 
   for (int i = 0; i < numberOfSources; i++){
     Source source(lambda, i);
@@ -60,18 +61,19 @@ void QueuingSystem::on_applyBtn_clicked()
 
 std::vector<Event> QueuingSystem::events() const
 {
-    return events_;
+  return events_;
 }
 
 void QueuingSystem::setEvents(const std::vector<Event> &events)
 {
-    events_ = events;
+  events_ = events;
 }
 
 void QueuingSystem::showStepStates() const
 {
   ui->timeTextBrowser->setText(QString::number(events_[currentStep_].getSystemTime()));
-  ui->bufferStateTextBrowser->setText(QString::number(events_[currentStep_].getNumberOfRequestsInBuffer()) + QString::fromStdString("/" + std::to_string(buffer_.getBufferSize())));
+  ui->bufferStateTextBrowser->setText(QString::number(events_[currentStep_].getNumberOfRequestsInBuffer()) +
+                                      QString::fromStdString("/" + std::to_string(buffer_.getBufferSize())));
   ui->stepCountTextBrowser->setText(QString::number(events_.size()));
 
   std::vector<DeviceStatus>deviceStatuses = events_[currentStep_].getDevicesIsBusy();
