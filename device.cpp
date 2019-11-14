@@ -45,7 +45,7 @@ double Device::calculateServiceTime(double currentTime, Request request)
     double randNumber = 0;
     while (randNumber == 1.0 || randNumber == 0.0)
         randNumber = rand() * fraction;
-    double serviceTime = (randNumber * (alpha_ - beta_) + beta_);
+    double serviceTime = (randNumber * (beta_ - alpha_) + alpha_);
   releaseTime_ = currentTime + serviceTime;
   status_ = busyStatus + "req from SOURCE " + std::to_string(request.getSourceNumber()) + " until " + std::to_string(releaseTime_);
   totalServiceTime_ += serviceTime;

@@ -2,6 +2,8 @@
 #define QUEUINGSYSTEM_H
 
 #include <QMainWindow>
+#include <QValidator>
+
 #include <vector>
 #include <iostream>
 #include <algorithm>
@@ -16,6 +18,11 @@
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
+
+const double MAX_DOUBLE_INPUT = 1000;
+const double MIN_DOUBLE_INPUT = -1000;
+const int MAX_INT_INPUT = 1000;
+const int MIN_INT_INPUT = -1000;
 
 class QueuingSystem: public QMainWindow
 {
@@ -54,6 +61,8 @@ private slots:
 
 private:
   Ui::MainWindow *ui;
+  QDoubleValidator doubleValidator_;
+  QIntValidator intValidator_;
   bool systemIsActive_;
   std::vector<Source> sources_;
   std::vector<Device> devices_;

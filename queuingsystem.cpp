@@ -4,12 +4,26 @@
 QueuingSystem::QueuingSystem(QWidget *parent):
   QMainWindow(parent),
   ui(new Ui::MainWindow),
+  doubleValidator_(MIN_DOUBLE_INPUT, MAX_DOUBLE_INPUT, 2, this),
+  intValidator_(MIN_INT_INPUT, MAX_INT_INPUT, this),
   buffer_(0),
   currentTime_(0),
   numberOfRequests_(0)
 {
-    ui->setupUi(this);
-    setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
+  ui->setupUi(this);
+
+  doubleValidator_.setNotation(QDoubleValidator::StandardNotation);
+  ui->lambdaInputLine->setValidator(&doubleValidator_);
+  ui->bufferSizeInputLine->setValidator(&intValidator_);
+  ui->numSourcesInputLine->setValidator(&intValidator_);
+  ui->numDevicesInputLine->setValidator(&intValidator_);
+  ui->numRequestInputLine->setValidator(&intValidator_);
+  ui->alphaInputLine->setValidator(&doubleValidator_);
+  ui->betaInputLine->setValidator(&doubleValidator_);
+
+  ui->enterStepBtn->hide();
+
+  setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
 }
 
 QueuingSystem::~QueuingSystem()
@@ -49,14 +63,17 @@ bool QueuingSystem::requiredReqNumberGenerated() const
 
 void QueuingSystem::on_applyBtn_clicked()
 {
+  ui->enterStepBtn->hide();
   int lambda = ui->lambdaInputLine->text().toInt();
+
   unsigned int bufferSize = ui->bufferSizeInputLine->text().toUInt();
   int sourcesNumber = ui->numSourcesInputLine->text().toInt();
   int devicesNumber = ui->numDevicesInputLine->text().toInt();
   int requestsNumber = ui->numRequestInputLine->text().toInt();
   int alpha = ui->alphaInputLine->text().toInt();
   int beta = ui->betaInputLine->text().toInt();
-  initializeSystem(sourcesNumber, requestsNumber, devicesNumber, lambda, bufferSize, alpha, beta);
+  if((bufferSize != 0) && (sourcesNumber != 0) && (devicesNumber != 0) && (requestsNumber != 0) && (beta > alpha))
+    initializeSystem(sourcesNumber, requestsNumber, devicesNumber, lambda, bufferSize, alpha, beta);
 }
 
 std::vector<Event> QueuingSystem::events() const
@@ -130,6 +147,8 @@ void QueuingSystem::on_autoSimulateBtn_clicked()
     ui->autoDeviceTableWidget->setItem(ui->autoDeviceTableWidget->rowCount() - 1, 0, new QTableWidgetItem(QString::number(device.getDeviceNumber())));
     ui->autoDeviceTableWidget->setItem(ui->autoDeviceTableWidget->rowCount() - 1, 1, new QTableWidgetItem(QString::number(device.getServiceCoefficient())));
   }
+
+  ui->enterStepBtn->show();
 }
 
 void QueuingSystem::on_enterStepBtn_clicked()
