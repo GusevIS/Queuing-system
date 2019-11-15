@@ -226,7 +226,7 @@ EventType QueuingSystem::determineNextEvent() const
     if(!buffer_.isEmpty())
       return EventType::SETTING_TO_DEVICE;
     else
-      return EventType::FROM_SOURCE_TO_DEVICE;
+      return EventType::SETTING_TO_BUFFER;
   }
   else
     return EventType::SETTING_TO_BUFFER;
@@ -298,8 +298,11 @@ Event QueuingSystem::executeNextEvent()
   case EventType::SETTING_TO_DEVICE:
   {
     Device device = chooseDevice(devices_);
-    currentTime_ = devices_[device.getDeviceNumber()].getReleaseTime();
     Request selectedRequest = buffer_.selectRequest();
+    if(device.getReleaseTime() > selectedRequest.getBufferArriveTime())
+      currentTime_ = devices_[device.getDeviceNumber()].getReleaseTime();
+    else
+      currentTime_ = selectedRequest.getBufferArriveTime();
 
     sources_[selectedRequest.getSourceNumber()].increaseProcessedRequestCount();
     selectedRequest.calculateWaitingTime(currentTime_);
@@ -322,7 +325,7 @@ Event QueuingSystem::executeNextEvent()
     currentTime_ = earliestRequest.getGenerationTime();
     generatedRequests_.erase(std::remove(generatedRequests_.begin(), generatedRequests_.end(), earliestRequest));
 
-    std::cout << "Request from source " << earliestRequest.getSourceNumber() << " " << earliestRequest.getGenerationTime() << "-->>" << device.getDeviceNumber() << std::endl;
+
 
     double serviceTime = devices_[device.getDeviceNumber()].calculateServiceTime(currentTime_, earliestRequest);
     sources_[earliestRequest.getSourceNumber()].increaseProcessedRequestCount();

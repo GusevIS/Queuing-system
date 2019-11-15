@@ -10,7 +10,6 @@ class Buffer
 {
 public:
   Buffer(unsigned int bufferSize);
- // Request findNextRequest(std::vector<Request>::iterator first, std::vector<Request>::iterator last) const;
   void receiveRequest(Request request);
   bool isFull() const;
   bool isEmpty() const;
