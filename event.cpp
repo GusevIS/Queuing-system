@@ -14,60 +14,60 @@ Event::Event(EventType eventType, double currentTime, std::string changeLog, int
 
 EventType Event::getEventType() const
 {
-    return eventType_;
+  return eventType_;
 }
 
 void Event::setEventType(const EventType &value)
 {
-    eventType_ = value;
+  eventType_ = value;
 }
 
 double Event::getSystemTime() const
 {
-    return systemTime_;
+  return systemTime_;
 }
 
 void Event::setSystemTime(double systemTime)
 {
-    systemTime_ = systemTime;
+  systemTime_ = systemTime;
 }
 
 std::string Event::getChangeLog() const
 {
-    return changeLog_;
+  return changeLog_;
 }
 
 void Event::setChangeLog(const std::string &changeLog)
 {
-    changeLog_ = changeLog;
+  changeLog_ = changeLog;
 }
 
 int Event::getNumberOfRequestsInBuffer() const
 {
-    return numberOfRequestsInBuffer_;
+  return numberOfRequestsInBuffer_;
 }
 
 void Event::setNumberOfRequestsInBuffer(int numberOfRequestsInBuffer)
 {
-    numberOfRequestsInBuffer_ = numberOfRequestsInBuffer;
+  numberOfRequestsInBuffer_ = numberOfRequestsInBuffer;
 }
 
 std::vector<DeviceStatus> Event::getDevicesIsBusy() const
 {
-    return devicesIsBusy_;
+  return devicesIsBusy_;
 }
 
 void Event::setDeviceIsBusy(std::vector<DeviceStatus> devicesIsBusy)
 {
-    devicesIsBusy_ = devicesIsBusy;
+  devicesIsBusy_ = devicesIsBusy;
 }
 
 std::vector<SourceStatus> Event::getSourcesStatuses() const
 {
-    return sourcesStatuses_;
+  return sourcesStatuses_;
 }
 
 void Event::setSourcesStatuses(const std::vector<SourceStatus> &value)
 {
-    sourcesStatuses_ = value;
+  sourcesStatuses_ = value;
 }

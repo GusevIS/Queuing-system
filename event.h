@@ -8,7 +8,6 @@ enum EventType
 {
   SETTING_TO_BUFFER,
   SETTING_TO_DEVICE,
-  FROM_SOURCE_TO_DEVICE
 };
 
 struct DeviceStatus

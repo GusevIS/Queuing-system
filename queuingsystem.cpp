@@ -221,15 +221,11 @@ EventType QueuingSystem::determineNextEvent() const
     return EventType::SETTING_TO_DEVICE;
   Request earliestRequest = chooseEarliestRequest(generatedRequests_);
   Device device = chooseDevice(devices_);
-  if(device.getReleaseTime() <= earliestRequest.getGenerationTime())
+  if((device.getReleaseTime() <= earliestRequest.getGenerationTime()) && (!buffer_.isEmpty()))
   {
-    if(!buffer_.isEmpty())
-      return EventType::SETTING_TO_DEVICE;
-    else
-      return EventType::SETTING_TO_BUFFER;
+    return EventType::SETTING_TO_DEVICE;
   }
-  else
-    return EventType::SETTING_TO_BUFFER;
+  return EventType::SETTING_TO_BUFFER;
 }
 
 void QueuingSystem::updateDevices()
@@ -311,35 +307,10 @@ Event QueuingSystem::executeNextEvent()
     double serviceTime = devices_[device.getDeviceNumber()].calculateServiceTime(currentTime_, selectedRequest);
     sources_[selectedRequest.getSourceNumber()].addProcessingTime(serviceTime);
 
-    std::cout << "Request from source " << selectedRequest.getSourceNumber() << " " << selectedRequest.getGenerationTime() << "-->>" << device.getDeviceNumber() << std::endl;
     std::string sourceNumber = std::to_string(selectedRequest.getSourceNumber());
     std::string generationTime = std::to_string(selectedRequest.getGenerationTime());
     std::string deviceNumber = std::to_string(device.getDeviceNumber());
     changeLog += "Request from source " + sourceNumber + " " + generationTime + " sent from BUFFER to" + " DEVICE " + deviceNumber;
-    break;
-  }
-  case EventType::FROM_SOURCE_TO_DEVICE:
-  {
-    Request earliestRequest = chooseEarliestRequest(generatedRequests_);
-    Device device = chooseDevice(devices_);
-    currentTime_ = earliestRequest.getGenerationTime();
-    generatedRequests_.erase(std::remove(generatedRequests_.begin(), generatedRequests_.end(), earliestRequest));
-
-
-
-    double serviceTime = devices_[device.getDeviceNumber()].calculateServiceTime(currentTime_, earliestRequest);
-    sources_[earliestRequest.getSourceNumber()].increaseProcessedRequestCount();
-    sources_[earliestRequest.getSourceNumber()].addProcessingTime(serviceTime);
-
-    if(sources_[earliestRequest.getSourceNumber()].getRequestCount() < numberOfRequests_){
-      Request newRequest = sources_[earliestRequest.getSourceNumber()].generateRequest(currentTime_);
-      generatedRequests_.push_back(newRequest);
-      sourceStatuses[earliestRequest.getSourceNumber()].isIdle = false;
-    }
-    std::string sourceNumber = std::to_string(earliestRequest.getSourceNumber());
-    std::string generationTime = std::to_string(earliestRequest.getGenerationTime());
-    std::string deviceNumber = std::to_string(device.getDeviceNumber());
-    changeLog += "Request from source " + sourceNumber + " " + generationTime + " sent from SOURCE to " + " DEVICE " + deviceNumber;
     break;
   }
   }
