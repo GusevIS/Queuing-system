@@ -100,14 +100,15 @@ void QueuingSystem::showStepStates() const
     ui->deviceStatusTableWidget->setItem(ui->deviceStatusTableWidget->rowCount() - 1, 0, new QTableWidgetItem(QString::number(device.deviceNumber)));
     ui->deviceStatusTableWidget->setItem(ui->deviceStatusTableWidget->rowCount() - 1, 1, new QTableWidgetItem(QString::fromStdString(device.status)));
   }
-  ui->deviceStatusTableWidget->horizontalHeader()->setSectionResizeMode(1 , QHeaderView::Stretch);
+  ui->deviceStatusTableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+  ui->deviceStatusTableWidget->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
   ui->changeLogTextBrowser->setText(QString::fromStdString(events_[currentStep_].getChangeLog()));
 
   std::vector<SourceStatus>sourceStatuses = events_[currentStep_].getSourcesStatuses();
   ui->sourceStatusTableWidget->setRowCount(0);
   for(auto source: sourceStatuses){
     ui->sourceStatusTableWidget->insertRow(ui->sourceStatusTableWidget->rowCount());
-    ui->sourceStatusTableWidget->setItem(ui->sourceStatusTableWidget->rowCount() - 1, 0, new QTableWidgetItem(QString::number(source.sourceNumber )));
+    ui->sourceStatusTableWidget->setItem(ui->sourceStatusTableWidget->rowCount() - 1, 0, new QTableWidgetItem(QString::number(source.sourceNumber)));
 
     QString qString;
     if(source.isIdle)
@@ -116,7 +117,22 @@ void QueuingSystem::showStepStates() const
       qString = "generate Request";
 
     ui->sourceStatusTableWidget->setItem(ui->sourceStatusTableWidget->rowCount() - 1, 1, new QTableWidgetItem(qString));
+    ui->sourceStatusTableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+    ui->sourceStatusTableWidget->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
   }
+
+  std::vector<BufferRequest> bufferStatus = events_[currentStep_].getBufferStatus();
+  ui->bufferTableWidget->setRowCount(0);
+  std::cout << "-----------------------------------------" << std::endl;
+
+  for(auto request: bufferStatus){
+    std::cout << request.arrivalTime << std::endl;
+    ui->bufferTableWidget->insertRow(ui->bufferTableWidget->rowCount());
+    ui->bufferTableWidget->setItem(ui->bufferTableWidget->rowCount() - 1, 0, new QTableWidgetItem(QString::number(request.sourceNumber)));
+    ui->bufferTableWidget->setItem(ui->bufferTableWidget->rowCount() - 1, 1, new QTableWidgetItem(QString::number(request.arrivalTime)));
+  }
+  ui->bufferTableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+  ui->bufferTableWidget->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
 }
 
 void QueuingSystem::on_autoSimulateBtn_clicked()
@@ -139,6 +155,7 @@ void QueuingSystem::on_autoSimulateBtn_clicked()
     ui->autoSourceTableWidget->setItem(ui->autoSourceTableWidget->rowCount() - 1, 7, new QTableWidgetItem(QString::number(resultSet.dispersionServTime)));
     ui->autoSourceTableWidget->setItem(ui->autoSourceTableWidget->rowCount() - 1, 8, new QTableWidgetItem(QString::number(resultSet.dispersionWaitTime)));
   }
+  ui->autoSourceTableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
   calculateServiceCoefficient();
   ui->autoDeviceTableWidget->setRowCount(0);
@@ -147,6 +164,7 @@ void QueuingSystem::on_autoSimulateBtn_clicked()
     ui->autoDeviceTableWidget->setItem(ui->autoDeviceTableWidget->rowCount() - 1, 0, new QTableWidgetItem(QString::number(device.getDeviceNumber())));
     ui->autoDeviceTableWidget->setItem(ui->autoDeviceTableWidget->rowCount() - 1, 1, new QTableWidgetItem(QString::number(device.getServiceCoefficient())));
   }
+  ui->autoDeviceTableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
   ui->enterStepBtn->show();
 }
@@ -321,6 +339,12 @@ Event QueuingSystem::executeNextEvent()
   for(auto device: devices_){
     devicesStatus.push_back( {device.getDeviceNumber(), device.getStatus()} );
   }
-  Event newEvent(eventType, currentTime_, changeLog, buffer_.getRequests().size(), devicesStatus, sourceStatuses);
+
+  std::vector<BufferRequest> bufferStatus;
+  for(auto &request: buffer_.getRequests()){
+    bufferStatus.push_back( {request.getSourceNumber(), request.getBufferArriveTime()} );
+  }
+
+  Event newEvent(eventType, currentTime_, changeLog, buffer_.getRequests().size(), devicesStatus, sourceStatuses, bufferStatus);
   return newEvent;
 }

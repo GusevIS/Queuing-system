@@ -74,7 +74,6 @@ int Device::getDeviceNumber() const
 
 std::string Device::getStatus() const
 {
-  std::cout << status_ << std::endl;
   return status_;
 }
 

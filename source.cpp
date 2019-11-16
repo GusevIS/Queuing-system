@@ -9,7 +9,7 @@ Source::Source(double lambda, int sourceNumber):
   deniedRequestsCount_(0),
   processedRequestCount_(0)
 {
-  std::cout << sourceNumber << std::endl;
+
 }
 
 Request Source::generateRequest(double currentTime)
