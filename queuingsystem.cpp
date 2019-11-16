@@ -4,7 +4,7 @@
 QueuingSystem::QueuingSystem(QWidget *parent):
   QMainWindow(parent),
   ui(new Ui::MainWindow),
-  doubleValidator_(MIN_DOUBLE_INPUT, MAX_DOUBLE_INPUT, 2, this),
+  regExpValidator_(QRegExp("[+-]?\\d*[\\.,]?\\d+"), this),
   intValidator_(MIN_INT_INPUT, MAX_INT_INPUT, this),
   buffer_(0),
   currentTime_(0),
@@ -12,14 +12,13 @@ QueuingSystem::QueuingSystem(QWidget *parent):
 {
   ui->setupUi(this);
 
-  doubleValidator_.setNotation(QDoubleValidator::StandardNotation);
-  ui->lambdaInputLine->setValidator(&doubleValidator_);
+  ui->lambdaInputLine->setValidator(&regExpValidator_);
   ui->bufferSizeInputLine->setValidator(&intValidator_);
   ui->numSourcesInputLine->setValidator(&intValidator_);
   ui->numDevicesInputLine->setValidator(&intValidator_);
   ui->numRequestInputLine->setValidator(&intValidator_);
-  ui->alphaInputLine->setValidator(&doubleValidator_);
-  ui->betaInputLine->setValidator(&doubleValidator_);
+  ui->alphaInputLine->setValidator(&regExpValidator_);
+  ui->betaInputLine->setValidator(&regExpValidator_);
 
   ui->enterStepBtn->hide();
 
@@ -33,13 +32,14 @@ QueuingSystem::~QueuingSystem()
 
 void QueuingSystem::initializeSystem(int numberOfSources, int numberOfRequests,
                       int numberOfDevices, double lambda, unsigned int bufferSize,
-                      int alpha, int beta)
+                      double alpha, double beta)
 {
   buffer_.setBufferSize(bufferSize);
   currentTime_ = 0;
   numberOfRequests_ = numberOfRequests;
   sources_.clear();
   devices_.clear();
+  events_.clear();
 
   for (int i = 0; i < numberOfSources; i++){
     Source source(lambda, i);
@@ -64,14 +64,14 @@ bool QueuingSystem::requiredReqNumberGenerated() const
 void QueuingSystem::on_applyBtn_clicked()
 {
   ui->enterStepBtn->hide();
-  int lambda = ui->lambdaInputLine->text().toInt();
+  double lambda = ui->lambdaInputLine->text().toDouble();
 
   unsigned int bufferSize = ui->bufferSizeInputLine->text().toUInt();
   int sourcesNumber = ui->numSourcesInputLine->text().toInt();
   int devicesNumber = ui->numDevicesInputLine->text().toInt();
   int requestsNumber = ui->numRequestInputLine->text().toInt();
-  int alpha = ui->alphaInputLine->text().toInt();
-  int beta = ui->betaInputLine->text().toInt();
+  double alpha = ui->alphaInputLine->text().toDouble();
+  double beta = ui->betaInputLine->text().toDouble();
   if((bufferSize != 0) && (sourcesNumber != 0) && (devicesNumber != 0) && (requestsNumber != 0) && (beta > alpha))
     initializeSystem(sourcesNumber, requestsNumber, devicesNumber, lambda, bufferSize, alpha, beta);
 }
@@ -123,10 +123,8 @@ void QueuingSystem::showStepStates() const
 
   std::vector<BufferRequest> bufferStatus = events_[currentStep_].getBufferStatus();
   ui->bufferTableWidget->setRowCount(0);
-  std::cout << "-----------------------------------------" << std::endl;
 
   for(auto request: bufferStatus){
-    std::cout << request.arrivalTime << std::endl;
     ui->bufferTableWidget->insertRow(ui->bufferTableWidget->rowCount());
     ui->bufferTableWidget->setItem(ui->bufferTableWidget->rowCount() - 1, 0, new QTableWidgetItem(QString::number(request.sourceNumber)));
     ui->bufferTableWidget->setItem(ui->bufferTableWidget->rowCount() - 1, 1, new QTableWidgetItem(QString::number(request.arrivalTime)));

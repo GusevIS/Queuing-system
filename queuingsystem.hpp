@@ -21,8 +21,8 @@ QT_END_NAMESPACE
 
 const double MAX_DOUBLE_INPUT = 1000;
 const double MIN_DOUBLE_INPUT = -1000;
-const int MAX_INT_INPUT = 1000;
-const int MIN_INT_INPUT = -1000;
+const int MAX_INT_INPUT = 9999;
+const int MIN_INT_INPUT = 0;
 
 class QueuingSystem: public QMainWindow
 {
@@ -33,7 +33,7 @@ public:
   ~QueuingSystem();
   void initializeSystem(int numberOfSources, int numberOfRequests,
                         int numberOfDevices, double lambda, unsigned int bufferSize,
-                        int alpha, int beta);
+                        double alpha, double beta);
   void startSystem();
   Event executeNextEvent();
   void showStepStates() const;
@@ -58,7 +58,7 @@ private slots:
 
 private:
   Ui::MainWindow *ui;
-  QDoubleValidator doubleValidator_;
+  QRegExpValidator regExpValidator_;
   QIntValidator intValidator_;
   bool systemIsActive_;
   std::vector<Source> sources_;

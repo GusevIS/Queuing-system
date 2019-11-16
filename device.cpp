@@ -2,7 +2,7 @@
 
 const double fraction = 1.0 / (static_cast<double>(RAND_MAX) + 1.0);
 
-Device::Device(int deviceNumber, int alpha, int beta):
+Device::Device(int deviceNumber, double alpha, double beta):
   releaseTime_(0),
   deviceNumber_(deviceNumber),
   alpha_(alpha),

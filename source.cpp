@@ -17,8 +17,7 @@ Request Source::generateRequest(double currentTime)
   double randNumber = 0.0;
   while (randNumber == 1.0 || randNumber == 0.0 )
     randNumber = rand() * fraction;
-  double generationTime = currentTime + (-log(randNumber)/lambda_);
-
+  double generationTime = currentTime + (-log(randNumber) / lambda_);
   Request request(sourceNumber_, generationTime);
   requestsCount_++;
 

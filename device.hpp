@@ -12,7 +12,7 @@ const std::string busyStatus = "service ";
 class Device
 {
 public:
-  Device(int deviceNumber, int alpha, int beta);
+  Device(int deviceNumber, double alpha, double beta);
   double calculateServiceTime(double currentTime, Request request);
   bool isFree(double currentTime) const;
   double getReleaseTime() const;
@@ -33,7 +33,7 @@ public:
 private:
   double releaseTime_;
   const int deviceNumber_;
-  int alpha_, beta_;
+  double alpha_, beta_;
   std::string status_;
   double totalServiceTime_;
   double serviceCoefficient_;
